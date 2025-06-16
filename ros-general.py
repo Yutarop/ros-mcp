@@ -1,4 +1,4 @@
-import os
+import os, sys
 import time
 import select
 import subprocess
@@ -321,41 +321,33 @@ async def show_ros2_interface(msg_type: str) -> str:
     """
     return run_ros_command(["ros2", "interface", "show", msg_type])
 
+
 @mcp.tool()
 async def launch_rqt_graph() -> str:
-    """Launches the rqt_graph GUI tool for visualizing ROS 2 nodes and topics using ros2 run command.
-    Note: This requires X11 forwarding if running in a remote environment.
-    
-    Example: No arguments needed. This will open the GUI.
-    """
     try:
-        # Get DISPLAY environment variable value for debugging
-        display_value = os.environ.get('DISPLAY', 'Not Set')
-        
-        # Launch using ros2 run command
+        env = os.environ.copy()
+        env["DISPLAY"] = env.get("DISPLAY", ":5")
+        env["XAUTHORITY"] = env.get("XAUTHORITY", "/home/ubuntu/.Xauthority")
+
         process = subprocess.Popen(
             ["ros2", "run", "rqt_graph", "rqt_graph"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            env=env 
         )
-        
-        # Give it a moment to start
+
         time.sleep(3)
-        
-        # Check if process is still running
+
         if process.poll() is None:
-            return f"rqt_graph has been launched successfully with PID {process.pid}. (DISPLAY: {display_value})"
+            return f"rqt_graph has been launched successfully with PID {process.pid}. (DISPLAY: {env['DISPLAY']})"
         else:
             stdout, stderr = process.communicate()
-            error_msg = stderr.strip() if stderr.strip() else "Unknown error"
-            return f"rqt_graph failed to start. DISPLAY: {display_value}. Error: {error_msg}"
-            
-    except FileNotFoundError:
-        return "Error: rqt_graph not found. Please install rqt-graph package: sudo apt install ros-humble-rqt-graph"
+            return f"rqt_graph failed to start. DISPLAY: {env['DISPLAY']}. Error: {stderr.strip()}"
+
     except Exception as e:
-        display_value = os.environ.get('DISPLAY', 'Not Set')
-        return f"Error launching rqt_graph: {e}. DISPLAY: {display_value}"
+        return f"Error launching rqt_graph: {e}"
+
 
 @mcp.tool()
 async def get_topic_info(topic_name: str) -> str:
