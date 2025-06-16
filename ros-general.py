@@ -2,34 +2,42 @@ import os, sys
 import time
 import select
 import subprocess
+import asyncio
+import websockets
+import json
 from typing import Any, Optional
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("ros-general")
 
+# WebSocket server configuration
+WEBSOCKET_SERVER_HOST = "localhost"
+WEBSOCKET_SERVER_PORT = 8765
+
+
 def run_ros_command(command: list[str], timeout: Optional[float] = None) -> str:
     """Helper function to run ROS2 commands with proper error handling.
-    
+
     Note: ROS 2 environment should be sourced when starting the MCP server.
     """
     try:
         if timeout:
             result = subprocess.run(
-                command, 
-                capture_output=True, 
-                text=True, 
+                command,
+                capture_output=True,
+                text=True,
                 timeout=timeout
             )
         else:
             result = subprocess.run(
-                command, 
-                capture_output=True, 
+                command,
+                capture_output=True,
                 text=True
             )
-        
+
         if result.returncode != 0:
             return f"Error: {result.stderr.strip()}"
-        
+
         return result.stdout.strip()
     except subprocess.TimeoutExpired:
         return f"Command timed out after {timeout} seconds"
@@ -38,9 +46,10 @@ def run_ros_command(command: list[str], timeout: Optional[float] = None) -> str:
     except Exception as e:
         return f"Unexpected error: {e}"
 
+
 def run_ros_command_with_bash(command: str, timeout: Optional[float] = None) -> str:
     """Helper function for complex bash commands that need shell processing.
-    
+
     Note: ROS 2 environment should be sourced when starting the MCP server.
     """
     try:
@@ -57,10 +66,10 @@ def run_ros_command_with_bash(command: str, timeout: Optional[float] = None) -> 
                 capture_output=True,
                 text=True
             )
-        
+
         if result.returncode != 0:
             return f"Error: {result.stderr.strip()}"
-        
+
         return result.stdout.strip()
     except subprocess.TimeoutExpired:
         return f"Command timed out after {timeout} seconds"
@@ -69,21 +78,54 @@ def run_ros_command_with_bash(command: str, timeout: Optional[float] = None) -> 
     except Exception as e:
         return f"Unexpected error: {e}"
 
+
+async def send_gui_command(command: str, args: dict = None) -> str:
+    """Send GUI command to WebSocket server running on local environment.
+    
+    Args:
+        command: Command to execute ('launch_rqt_graph', 'launch_rviz', etc.)
+        args: Additional arguments for the command
+    
+    Returns:
+        Response from the WebSocket server
+    """
+    try:
+        uri = f"ws://{WEBSOCKET_SERVER_HOST}:{WEBSOCKET_SERVER_PORT}"
+        
+        message = {
+            "command": command,
+            "args": args or {}
+        }
+        
+        async with websockets.connect(uri, timeout=10) as websocket:
+            await websocket.send(json.dumps(message))
+            response = await websocket.recv()
+            return json.loads(response).get("result", "No response from server")
+            
+    except ConnectionRefusedError:
+        return f"Error: Could not connect to GUI server at {uri}. Make sure the WebSocket server is running."
+    except asyncio.TimeoutError:
+        return "Error: Connection to GUI server timed out."
+    except Exception as e:
+        return f"Error communicating with GUI server: {e}"
+
+
 @mcp.tool()
 async def list_topics() -> str:
     """Displays a list of currently accessible ROS2 topics.
-    
+
     Example: Used when the user asks "What topics are available?"
     """
     return run_ros_command(["ros2", "topic", "list"])
 
+
 @mcp.tool()
 async def check_topic_status(topic_name: str) -> str:
     """Checks whether a specific ROS2 topic is actively publishing messages.
-    
+
     Args:
         topic_name: The name of the ROS2 topic to check
-        
+
     Example: Used when the user asks "Is the topic /scan publishing data?"
     """
     if not topic_name:
@@ -111,8 +153,8 @@ async def check_topic_status(topic_name: str) -> str:
 
         # Check output content
         if (
-            "does not appear to be published yet" in line
-            or "Could not determine the type" in line
+                "does not appear to be published yet" in line
+                or "Could not determine the type" in line
         ):
             return f"The topic '{topic_name}' is not currently being published or has an unknown type.\n\nDetails:\n{line.strip()}"
         elif line.strip():
@@ -123,18 +165,20 @@ async def check_topic_status(topic_name: str) -> str:
     except Exception as e:
         return f"An error occurred while checking the topic: {e}"
 
+
 @mcp.tool()
 async def find_ros2_package(pkg_name: str) -> str:
     """Searches for available ROS 2 packages that match a given keyword.
 
     Args:
         pkg_name: Partial or full name of the package to search for
-        
+
     Example: "Are there any packages related to turtle?" → ros2 pkg list | grep turtle
     """
     command = f"ros2 pkg list | grep {pkg_name}"
     result = run_ros_command_with_bash(command)
     return result or f"No package found matching '{pkg_name}'."
+
 
 @mcp.tool()
 async def run_ros2_executable(package: str, executable: str) -> str:
@@ -143,7 +187,7 @@ async def run_ros2_executable(package: str, executable: str) -> str:
     Args:
         package: Name of the ROS2 package
         executable: Name of the executable to run
-        
+
     Example: "Start the turtlesim node" → ros2 run turtlesim turtlesim_node
     """
     try:
@@ -152,14 +196,16 @@ async def run_ros2_executable(package: str, executable: str) -> str:
     except Exception as e:
         return f"Failed to run executable: {e}"
 
+
 @mcp.tool()
 async def list_ros2_nodes() -> str:
     """Lists currently running ROS 2 nodes.
-    
+
     Example: "Which nodes are currently running?" → ros2 node list
     """
     result = run_ros_command(["ros2", "node", "list"])
     return result or "No nodes are currently running."
+
 
 @mcp.tool()
 async def get_ros2_node_info(node_name: str) -> str:
@@ -167,13 +213,14 @@ async def get_ros2_node_info(node_name: str) -> str:
 
     Args:
         node_name: Name of the node (e.g., /turtlesim)
-        
+
     Example: "Tell me about node /turtlesim" → ros2 node info /turtlesim
     """
     result = run_ros_command(["ros2", "node", "info", node_name])
     if "Error:" in result:
         return f"Node '{node_name}' not found or not running."
     return result
+
 
 @mcp.tool()
 async def publish_ros2_topic(topic: str, msg_type: str, msg_content: str, duration: int) -> str:
@@ -184,7 +231,7 @@ async def publish_ros2_topic(topic: str, msg_type: str, msg_content: str, durati
         msg_type: ROS 2 message type (e.g., "std_msgs/msg/String")
         msg_content: Message to send (e.g., "data: Hello")
         duration: Duration in seconds to continue publishing
-        
+
     Example:
         topic: "/chatter"
         msg_type: "std_msgs/msg/String"
@@ -204,13 +251,14 @@ async def publish_ros2_topic(topic: str, msg_type: str, msg_content: str, durati
     except Exception as e:
         return f"Error publishing to topic: {e}"
 
+
 @mcp.tool()
 async def check_ros2_topic_hz(topic_name: str) -> str:
     """Displays the publishing frequency (Hz) of a given ROS 2 topic.
 
     Args:
         topic_name: Name of the topic (e.g., /scan)
-        
+
     Example: "Check the message rate on /scan" → ros2 topic hz /scan
     """
     try:
@@ -254,13 +302,15 @@ ros2 topic hz {topic_name}
     except Exception as e:
         return f"Failed to check topic hz: {e}"
 
+
 @mcp.tool()
 async def list_ros2_services() -> str:
     """Lists available ROS 2 services.
-    
+
     Example: No arguments needed. Just returns the list.
     """
     return run_ros_command(["ros2", "service", "list"])
+
 
 @mcp.tool()
 async def call_ros2_service(service_name: str, srv_type: str, request: str) -> str:
@@ -270,7 +320,7 @@ async def call_ros2_service(service_name: str, srv_type: str, request: str) -> s
         service_name: Name of the service to call
         srv_type: Type of the service (e.g., std_srvs/srv/Empty)
         request: Request payload in string format (e.g., "{}")
-        
+
     Example:
         service_name: "/clear_costmap"
         srv_type: "std_srvs/srv/Empty"
@@ -278,13 +328,15 @@ async def call_ros2_service(service_name: str, srv_type: str, request: str) -> s
     """
     return run_ros_command(["ros2", "service", "call", service_name, srv_type, request])
 
+
 @mcp.tool()
 async def list_ros2_actions() -> str:
     """Lists available ROS 2 actions.
-    
+
     Example: No arguments needed. Just returns the list.
     """
     return run_ros_command(["ros2", "action", "list"])
+
 
 @mcp.tool()
 async def send_ros2_action_goal(action_name: str, action_type: str, goal: str) -> str:
@@ -294,7 +346,7 @@ async def send_ros2_action_goal(action_name: str, action_type: str, goal: str) -
         action_name: Name of the action
         action_type: Action type (e.g., example_interfaces/action/Fibonacci)
         goal: Goal message (e.g., "{order: 5}")
-        
+
     Example:
         action_name: "/fibonacci"
         action_type: "example_interfaces/action/Fibonacci"
@@ -302,13 +354,15 @@ async def send_ros2_action_goal(action_name: str, action_type: str, goal: str) -
     """
     return run_ros_command(["ros2", "action", "send_goal", action_name, action_type, goal])
 
+
 @mcp.tool()
 async def run_ros2_doctor() -> str:
     """Runs ros2 doctor to check ROS 2 environment setup and issues.
-    
+
     Example: No arguments needed. Just runs the doctor tool.
     """
     return run_ros_command(["ros2", "doctor"])
+
 
 @mcp.tool()
 async def show_ros2_interface(msg_type: str) -> str:
@@ -316,7 +370,7 @@ async def show_ros2_interface(msg_type: str) -> str:
 
     Args:
         msg_type: The interface type to show (e.g., std_msgs/msg/String)
-        
+
     Example: msg_type: "std_msgs/msg/String"
     """
     return run_ros_command(["ros2", "interface", "show", msg_type])
@@ -324,46 +378,38 @@ async def show_ros2_interface(msg_type: str) -> str:
 
 @mcp.tool()
 async def launch_rqt_graph() -> str:
-    try:
-        env = os.environ.copy()
-        env["DISPLAY"] = env.get("DISPLAY", ":5")
-        env["XAUTHORITY"] = env.get("XAUTHORITY", "/home/ubuntu/.Xauthority")
+    """Launch rqt_graph GUI tool via WebSocket server.
+    
+    Example: Launch rqt_graph to visualize ROS2 node connections
+    """
+    return await send_gui_command("launch_rqt_graph")
 
-        process = subprocess.Popen(
-            ["ros2", "run", "rqt_graph", "rqt_graph"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            env=env 
-        )
 
-        time.sleep(3)
-
-        if process.poll() is None:
-            return f"rqt_graph has been launched successfully with PID {process.pid}. (DISPLAY: {env['DISPLAY']})"
-        else:
-            stdout, stderr = process.communicate()
-            return f"rqt_graph failed to start. DISPLAY: {env['DISPLAY']}. Error: {stderr.strip()}"
-
-    except Exception as e:
-        return f"Error launching rqt_graph: {e}"
+@mcp.tool()
+async def launch_rviz() -> str:
+    """Launch RViz2 GUI tool via WebSocket server.
+    
+    Example: Launch RViz2 for visualization
+    """
+    return await send_gui_command("launch_rviz")
 
 
 @mcp.tool()
 async def get_topic_info(topic_name: str) -> str:
     """Get detailed information about a specific ROS2 topic.
-    
+
     Args:
         topic_name: Name of the topic to get info about
-        
+
     Example: Get information about /cmd_vel topic
     """
     return run_ros_command(["ros2", "topic", "info", topic_name])
 
+
 @mcp.tool()
 async def debug_ros2_environment() -> str:
     """Debug ROS 2 environment variables and setup.
-    
+
     Example: Check current ROS 2 environment configuration
     """
     debug_command = """
@@ -378,23 +424,25 @@ ros2 topic list
 echo "=== Available nodes ==="
 ros2 node list
 """.strip()
-    
+
     return run_ros_command_with_bash(debug_command)
+
 
 @mcp.tool()
 async def echo_ros2_topic(topic_name: str, count: int = 1) -> str:
     """Echo messages from a ROS2 topic for a specified number of messages.
-    
+
     Args:
         topic_name: Name of the topic to echo
         count: Number of messages to capture (default: 1)
-        
+
     Example: Echo 5 messages from /scan topic
     """
     if count == 1:
         return run_ros_command(["ros2", "topic", "echo", topic_name, "--once"], timeout=10)
     else:
         return run_ros_command(["ros2", "topic", "echo", topic_name, f"--times", str(count)], timeout=10)
+
 
 if __name__ == "__main__":
     mcp.run(transport='stdio')
