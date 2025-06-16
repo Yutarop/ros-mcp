@@ -97,7 +97,7 @@ async def send_gui_command(command: str, args: dict = None) -> str:
             "args": args or {}
         }
         
-        async with websockets.connect(uri, timeout=10) as websocket:
+        async with websockets.connect(uri) as websocket:
             await websocket.send(json.dumps(message))
             response = await websocket.recv()
             return json.loads(response).get("result", "No response from server")
