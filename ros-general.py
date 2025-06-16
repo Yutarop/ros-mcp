@@ -323,15 +323,39 @@ async def show_ros2_interface(msg_type: str) -> str:
 
 @mcp.tool()
 async def launch_rqt_graph() -> str:
-    """Launches the rqt_graph GUI tool for visualizing ROS 2 nodes and topics.
+    """Launches the rqt_graph GUI tool for visualizing ROS 2 nodes and topics using ros2 run command.
+    Note: This requires X11 forwarding if running in a remote environment.
     
     Example: No arguments needed. This will open the GUI.
     """
     try:
-        subprocess.Popen(["rqt_graph"])
-        return "rqt_graph has been launched."
+        # Get DISPLAY environment variable value for debugging
+        display_value = os.environ.get('DISPLAY', 'Not Set')
+        
+        # Launch using ros2 run command
+        process = subprocess.Popen(
+            ["ros2", "run", "rqt_graph", "rqt_graph"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        # Give it a moment to start
+        time.sleep(3)
+        
+        # Check if process is still running
+        if process.poll() is None:
+            return f"rqt_graph has been launched successfully with PID {process.pid}. (DISPLAY: {display_value})"
+        else:
+            stdout, stderr = process.communicate()
+            error_msg = stderr.strip() if stderr.strip() else "Unknown error"
+            return f"rqt_graph failed to start. DISPLAY: {display_value}. Error: {error_msg}"
+            
+    except FileNotFoundError:
+        return "Error: rqt_graph not found. Please install rqt-graph package: sudo apt install ros-humble-rqt-graph"
     except Exception as e:
-        return f"Error launching rqt_graph: {e}"
+        display_value = os.environ.get('DISPLAY', 'Not Set')
+        return f"Error launching rqt_graph: {e}. DISPLAY: {display_value}"
 
 @mcp.tool()
 async def get_topic_info(topic_name: str) -> str:
@@ -356,6 +380,7 @@ echo "ROS_DISTRO: $ROS_DISTRO"
 echo "ROS_DOMAIN_ID: $ROS_DOMAIN_ID" 
 echo "RMW_IMPLEMENTATION: $RMW_IMPLEMENTATION"
 echo "AMENT_PREFIX_PATH: $AMENT_PREFIX_PATH"
+echo "DISPLAY: $DISPLAY"
 echo "=== Available topics ==="
 ros2 topic list
 echo "=== Available nodes ==="
@@ -363,6 +388,9 @@ ros2 node list
 """.strip()
     
     return run_ros_command_with_bash(debug_command)
+
+@mcp.tool()
+async def echo_ros2_topic(topic_name: str, count: int = 1) -> str:
     """Echo messages from a ROS2 topic for a specified number of messages.
     
     Args:
@@ -374,7 +402,7 @@ ros2 node list
     if count == 1:
         return run_ros_command(["ros2", "topic", "echo", topic_name, "--once"], timeout=10)
     else:
-        return run_ros_command(["ros2", "topic", "echo", topic_name, f"-n {count}"], timeout=10)
+        return run_ros_command(["ros2", "topic", "echo", topic_name, f"--times", str(count)], timeout=10)
 
 if __name__ == "__main__":
     mcp.run(transport='stdio')
