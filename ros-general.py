@@ -1,11 +1,13 @@
-import os, sys
-import time
+import asyncio
+import json
+import os
 import select
 import subprocess
-import asyncio
-import websockets
-import json
+import sys
+import time
 from typing import Any, Optional
+
+import websockets
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("ros-general")
@@ -20,12 +22,12 @@ def get_ros_env():
     env = os.environ.copy()
 
     # Ensure ROS_DOMAIN_ID is set
-    if 'ROS_DOMAIN_ID' not in env:
-        env['ROS_DOMAIN_ID'] = '37'  # Default value
+    if "ROS_DOMAIN_ID" not in env:
+        env["ROS_DOMAIN_ID"] = "37"  # Default value
 
     # Ensure other important ROS variables
-    if 'ROS_DISTRO' not in env:
-        env['ROS_DISTRO'] = 'humble'
+    if "ROS_DISTRO" not in env:
+        env["ROS_DISTRO"] = "humble"
 
 
 def run_ros_command(command: list[str], timeout: Optional[float] = None) -> str:
@@ -42,14 +44,14 @@ def run_ros_command(command: list[str], timeout: Optional[float] = None) -> str:
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                env=env  # Pass environment explicitly
+                env=env,  # Pass environment explicitly
             )
         else:
             result = subprocess.run(
                 command,
                 capture_output=True,
                 text=True,
-                env=env  # Pass environment explicitly
+                env=env,  # Pass environment explicitly
             )
 
         if result.returncode != 0:
@@ -74,12 +76,12 @@ def run_ros_command_with_bash(command: str, timeout: Optional[float] = None) -> 
 
         # Create a comprehensive bash command that sources ROS and sets environment
         full_command = f"""
-source /opt/ros/humble/setup.bash
-if [ -f ~/ros2_ws/install/setup.bash ]; then source ~/ros2_ws/install/setup.bash; fi
-export ROS_DOMAIN_ID={env.get('ROS_DOMAIN_ID', '37')}
-export ROS_DISTRO={env.get('ROS_DISTRO', 'humble')}
-{command}
-""".strip()
+        source /opt/ros/humble/setup.bash
+        if [ -f ~/ros2_ws/install/setup.bash ]; then source ~/ros2_ws/install/setup.bash; fi
+        export ROS_DOMAIN_ID={env.get('ROS_DOMAIN_ID', '37')}
+        export ROS_DISTRO={env.get('ROS_DISTRO', 'humble')}
+        {command}
+        """.strip()
 
         if timeout:
             result = subprocess.run(
@@ -87,14 +89,11 @@ export ROS_DISTRO={env.get('ROS_DISTRO', 'humble')}
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                env=env
+                env=env,
             )
         else:
             result = subprocess.run(
-                ["bash", "-c", full_command],
-                capture_output=True,
-                text=True,
-                env=env
+                ["bash", "-c", full_command], capture_output=True, text=True, env=env
             )
 
         if result.returncode != 0:
@@ -122,10 +121,7 @@ async def send_gui_command(command: str, args: dict = None) -> str:
     try:
         uri = f"ws://{WEBSOCKET_SERVER_HOST}:{WEBSOCKET_SERVER_PORT}"
 
-        message = {
-            "command": command,
-            "args": args or {}
-        }
+        message = {"command": command, "args": args or {}}
 
         async with websockets.connect(uri) as websocket:
             await websocket.send(json.dumps(message))
@@ -170,7 +166,7 @@ async def check_topic_status(topic_name: str) -> str:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            env=env
+            env=env,
         )
 
         # Wait up to 3 seconds for output from stdout
@@ -186,8 +182,8 @@ async def check_topic_status(topic_name: str) -> str:
 
         # Check output content
         if (
-                "does not appear to be published yet" in line
-                or "Could not determine the type" in line
+            "does not appear to be published yet" in line
+            or "Could not determine the type" in line
         ):
             return f"The topic '{topic_name}' is not currently being published or has an unknown type.\n\nDetails:\n{line.strip()}"
         elif line.strip():
@@ -225,10 +221,7 @@ async def run_ros2_executable(package: str, executable: str) -> str:
     """
     try:
         env = get_ros_env()
-        process = subprocess.Popen(
-            ["ros2", "run", package, executable],
-            env=env
-        )
+        process = subprocess.Popen(["ros2", "run", package, executable], env=env)
         return f"Started executable '{executable}' from package '{package}' with PID {process.pid}."
     except Exception as e:
         return f"Failed to run executable: {e}"
@@ -260,7 +253,9 @@ async def get_ros2_node_info(node_name: str) -> str:
 
 
 @mcp.tool()
-async def publish_ros2_topic(topic: str, msg_type: str, msg_content: str, duration: int) -> str:
+async def publish_ros2_topic(
+    topic: str, msg_type: str, msg_content: str, duration: int
+) -> str:
     """Publishes a message to a specific ROS 2 topic for a given duration (in seconds).
 
     Args:
@@ -282,7 +277,7 @@ async def publish_ros2_topic(topic: str, msg_type: str, msg_content: str, durati
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            env=env
+            env=env,
         )
         time.sleep(duration)
         process.terminate()
@@ -303,18 +298,18 @@ async def check_ros2_topic_hz(topic_name: str) -> str:
     try:
         env = get_ros_env()
         full_command = f"""
-source /opt/ros/humble/setup.bash
-if [ -f ~/ros2_ws/install/setup.bash ]; then source ~/ros2_ws/install/setup.bash; fi
-export ROS_DOMAIN_ID={env.get('ROS_DOMAIN_ID', '37')}
-export ROS_DISTRO={env.get('ROS_DISTRO', 'humble')}
-ros2 topic hz {topic_name}
-""".strip()
+        source /opt/ros/humble/setup.bash
+        if [ -f ~/ros2_ws/install/setup.bash ]; then source ~/ros2_ws/install/setup.bash; fi
+        export ROS_DOMAIN_ID={env.get('ROS_DOMAIN_ID', '37')}
+        export ROS_DISTRO={env.get('ROS_DISTRO', 'humble')}
+        ros2 topic hz {topic_name}
+        """.strip()
         process = subprocess.Popen(
             ["bash", "-c", full_command],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            env=env
+            env=env,
         )
 
         # Wait a few seconds for output to accumulate
@@ -388,7 +383,9 @@ async def send_ros2_action_goal(action_name: str, action_type: str, goal: str) -
         action_type: "example_interfaces/action/Fibonacci"
         goal: "{order: 5}"
     """
-    return run_ros_command(["ros2", "action", "send_goal", action_name, action_type, goal])
+    return run_ros_command(
+        ["ros2", "action", "send_goal", action_name, action_type, goal]
+    )
 
 
 @mcp.tool()
@@ -429,6 +426,7 @@ async def launch_rviz() -> str:
     """
     return await send_gui_command("launch_rviz")
 
+
 @mcp.tool()
 async def launch_turtlesim() -> str:
     """Launch turtlesim GUI application via WebSocket server.
@@ -436,6 +434,7 @@ async def launch_turtlesim() -> str:
     Example: Launch turtlesim for turtle simulation
     """
     return await send_gui_command("launch_turtlesim")
+
 
 @mcp.tool()
 async def launch_gazebo() -> str:
@@ -484,15 +483,15 @@ async def debug_ros2_environment() -> str:
     """
     env = get_ros_env()
     debug_command = f"""
-echo "=== ROS 2 Environment Debug ==="
-echo "ROS_DISTRO: {env.get('ROS_DISTRO', 'Not set')}"
-echo "ROS_DOMAIN_ID: {env.get('ROS_DOMAIN_ID', 'Not set')}"
-echo "DISPLAY: {env.get('DISPLAY', 'Not set')}"
-echo "=== Available topics ==="
-ros2 topic list
-echo "=== Available nodes ==="
-ros2 node list
-""".strip()
+    echo "=== ROS 2 Environment Debug ==="
+    echo "ROS_DISTRO: {env.get('ROS_DISTRO', 'Not set')}"
+    echo "ROS_DOMAIN_ID: {env.get('ROS_DOMAIN_ID', 'Not set')}"
+    echo "DISPLAY: {env.get('DISPLAY', 'Not set')}"
+    echo "=== Available topics ==="
+    ros2 topic list
+    echo "=== Available nodes ==="
+    ros2 node list
+    """.strip()
 
     return run_ros_command_with_bash(debug_command)
 
@@ -508,10 +507,14 @@ async def echo_ros2_topic(topic_name: str, count: int = 1) -> str:
     Example: Echo 5 messages from /scan topic
     """
     if count == 1:
-        return run_ros_command(["ros2", "topic", "echo", topic_name, "--once"], timeout=10)
+        return run_ros_command(
+            ["ros2", "topic", "echo", topic_name, "--once"], timeout=10
+        )
     else:
-        return run_ros_command(["ros2", "topic", "echo", topic_name, f"--times", str(count)], timeout=10)
+        return run_ros_command(
+            ["ros2", "topic", "echo", topic_name, f"--times", str(count)], timeout=10
+        )
 
 
 if __name__ == "__main__":
-    mcp.run(transport='stdio')
+    mcp.run(transport="stdio")

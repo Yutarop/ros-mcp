@@ -6,19 +6,19 @@ that require X11 display access.
 """
 
 import asyncio
-import websockets
 import json
-import subprocess
-import os
 import logging
+import os
 import signal
+import subprocess
 import sys
-from typing import Dict, Any
+from typing import Any, Dict
+
+import websockets
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -35,35 +35,37 @@ class GUILauncher:
         self.env = os.environ.copy()
 
         # Set default values if not already set
-        if 'ROS_DISTRO' not in self.env:
-            self.env['ROS_DISTRO'] = 'humble'
+        if "ROS_DISTRO" not in self.env:
+            self.env["ROS_DISTRO"] = "humble"
 
-        if 'ROS_DOMAIN_ID' not in self.env:
-            self.env['ROS_DOMAIN_ID'] = '37'
+        if "ROS_DOMAIN_ID" not in self.env:
+            self.env["ROS_DOMAIN_ID"] = "37"
 
-        if 'DISPLAY' not in self.env:
-            self.env['DISPLAY'] = ':0'
+        if "DISPLAY" not in self.env:
+            self.env["DISPLAY"] = ":0"
 
         # Set TurtleBot3 model if not set
-        if 'TURTLEBOT3_MODEL' not in self.env:
-            self.env['TURTLEBOT3_MODEL'] = 'burger'
+        if "TURTLEBOT3_MODEL" not in self.env:
+            self.env["TURTLEBOT3_MODEL"] = "burger"
 
         # Source ROS2 setup
         setup_command = f"""
-source /opt/ros/humble/setup.bash
-if [ -f ~/ros2_ws/install/setup.bash ]; then source ~/ros2_ws/install/setup.bash; fi
-if [ -f ~/turtlebot3_ws/install/setup.bash ]; then source ~/turtlebot3_ws/install/setup.bash; fi
-export ROS_DOMAIN_ID={self.env['ROS_DOMAIN_ID']}
-export ROS_DISTRO={self.env['ROS_DISTRO']}
-export DISPLAY={self.env['DISPLAY']}
-export TURTLEBOT3_MODEL={self.env['TURTLEBOT3_MODEL']}
-"""
-        self.env['ROS_SETUP'] = setup_command.strip()
+        source /opt/ros/humble/setup.bash
+        if [ -f ~/ros2_ws/install/setup.bash ]; then source ~/ros2_ws/install/setup.bash; fi
+        if [ -f ~/turtlebot3_ws/install/setup.bash ]; then source ~/turtlebot3_ws/install/setup.bash; fi
+        export ROS_DOMAIN_ID={self.env['ROS_DOMAIN_ID']}
+        export ROS_DISTRO={self.env['ROS_DISTRO']}
+        export DISPLAY={self.env['DISPLAY']}
+        export TURTLEBOT3_MODEL={self.env['TURTLEBOT3_MODEL']}
+        """
+        self.env["ROS_SETUP"] = setup_command.strip()
 
-        logger.info(f"Environment setup - ROS_DISTRO: {self.env.get('ROS_DISTRO')}, "
-                    f"ROS_DOMAIN_ID: {self.env.get('ROS_DOMAIN_ID')}, "
-                    f"DISPLAY: {self.env.get('DISPLAY')}, "
-                    f"TURTLEBOT3_MODEL: {self.env.get('TURTLEBOT3_MODEL')}")
+        logger.info(
+            f"Environment setup - ROS_DISTRO: {self.env.get('ROS_DISTRO')}, "
+            f"ROS_DOMAIN_ID: {self.env.get('ROS_DOMAIN_ID')}, "
+            f"DISPLAY: {self.env.get('DISPLAY')}, "
+            f"TURTLEBOT3_MODEL: {self.env.get('TURTLEBOT3_MODEL')}"
+        )
 
     async def launch_rqt_graph(self) -> str:
         """Launch rqt_graph GUI application."""
@@ -73,16 +75,16 @@ export TURTLEBOT3_MODEL={self.env['TURTLEBOT3_MODEL']}
 
             # Launch rqt_graph
             command = f"""
-{self.env['ROS_SETUP']}
-ros2 run rqt_graph rqt_graph
-"""
+            {self.env['ROS_SETUP']}
+            ros2 run rqt_graph rqt_graph
+            """
 
             process = subprocess.Popen(
                 ["bash", "-c", command],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 env=self.env,
-                preexec_fn=os.setsid  # Create new process group
+                preexec_fn=os.setsid,  # Create new process group
             )
 
             self.running_processes["rqt_graph"] = process
@@ -95,7 +97,9 @@ ros2 run rqt_graph rqt_graph
                 return f"rqt_graph launched successfully with PID {process.pid}"
             else:
                 stdout, stderr = process.communicate()
-                error_msg = f"rqt_graph failed to start. Error: {stderr.decode().strip()}"
+                error_msg = (
+                    f"rqt_graph failed to start. Error: {stderr.decode().strip()}"
+                )
                 logger.error(error_msg)
                 return error_msg
 
@@ -112,16 +116,16 @@ ros2 run rqt_graph rqt_graph
 
             # Launch rviz2
             command = f"""
-{self.env['ROS_SETUP']}
-ros2 run rviz2 rviz2
-"""
+            {self.env['ROS_SETUP']}
+            ros2 run rviz2 rviz2
+            """
 
             process = subprocess.Popen(
                 ["bash", "-c", command],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 env=self.env,
-                preexec_fn=os.setsid  # Create new process group
+                preexec_fn=os.setsid,  # Create new process group
             )
 
             self.running_processes["rviz2"] = process
@@ -151,16 +155,16 @@ ros2 run rviz2 rviz2
 
             # Launch turtlesim
             command = f"""
-{self.env['ROS_SETUP']}
-ros2 run turtlesim turtlesim_node
-"""
+            {self.env['ROS_SETUP']}
+            ros2 run turtlesim turtlesim_node
+            """
 
             process = subprocess.Popen(
                 ["bash", "-c", command],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 env=self.env,
-                preexec_fn=os.setsid  # Create new process group
+                preexec_fn=os.setsid,  # Create new process group
             )
 
             self.running_processes["turtlesim_node"] = process
@@ -173,7 +177,9 @@ ros2 run turtlesim turtlesim_node
                 return f"turtlesim launched successfully with PID {process.pid}"
             else:
                 stdout, stderr = process.communicate()
-                error_msg = f"turtlesim failed to start. Error: {stderr.decode().strip()}"
+                error_msg = (
+                    f"turtlesim failed to start. Error: {stderr.decode().strip()}"
+                )
                 logger.error(error_msg)
                 return error_msg
 
@@ -190,16 +196,16 @@ ros2 run turtlesim turtlesim_node
 
             # Launch gazebo
             command = f"""
-{self.env['ROS_SETUP']}
-gazebo
-"""
+            {self.env['ROS_SETUP']}
+            gazebo
+            """
 
             process = subprocess.Popen(
                 ["bash", "-c", command],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 env=self.env,
-                preexec_fn=os.setsid  # Create new process group
+                preexec_fn=os.setsid,  # Create new process group
             )
 
             self.running_processes["gazebo"] = process
@@ -231,16 +237,16 @@ gazebo
 
             # Launch TurtleBot3 world
             command = f"""
-{self.env['ROS_SETUP']}
-ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
-"""
+            {self.env['ROS_SETUP']}
+            ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+            """
 
             process = subprocess.Popen(
                 ["bash", "-c", command],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 env=self.env,
-                preexec_fn=os.setsid  # Create new process group
+                preexec_fn=os.setsid,  # Create new process group
             )
 
             self.running_processes["turtlebot3_world"] = process
@@ -249,7 +255,9 @@ ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
             await asyncio.sleep(5)
 
             if process.poll() is None:
-                logger.info(f"TurtleBot3 world launched successfully with PID {process.pid}")
+                logger.info(
+                    f"TurtleBot3 world launched successfully with PID {process.pid}"
+                )
                 return f"TurtleBot3 world launched successfully with PID {process.pid}"
             else:
                 stdout, stderr = process.communicate()
@@ -272,16 +280,16 @@ ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 
             # Launch TurtleBot3 empty world
             command = f"""
-{self.env['ROS_SETUP']}
-ros2 launch turtlebot3_gazebo turtlebot3_empty_world.launch.py
-"""
+            {self.env['ROS_SETUP']}
+            ros2 launch turtlebot3_gazebo turtlebot3_empty_world.launch.py
+            """
 
             process = subprocess.Popen(
                 ["bash", "-c", command],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 env=self.env,
-                preexec_fn=os.setsid  # Create new process group
+                preexec_fn=os.setsid,  # Create new process group
             )
 
             self.running_processes["turtlebot3_empty_world"] = process
@@ -290,7 +298,9 @@ ros2 launch turtlebot3_gazebo turtlebot3_empty_world.launch.py
             await asyncio.sleep(5)
 
             if process.poll() is None:
-                logger.info(f"TurtleBot3 empty world launched successfully with PID {process.pid}")
+                logger.info(
+                    f"TurtleBot3 empty world launched successfully with PID {process.pid}"
+                )
                 return f"TurtleBot3 empty world launched successfully with PID {process.pid}"
             else:
                 stdout, stderr = process.communicate()
@@ -307,9 +317,11 @@ ros2 launch turtlebot3_gazebo turtlebot3_empty_world.launch.py
         """Kill existing processes by name."""
         try:
             # Kill by process name
-            subprocess.run(["pkill", "-f", process_name],
-                           stdout=subprocess.DEVNULL,
-                           stderr=subprocess.DEVNULL)
+            subprocess.run(
+                ["pkill", "-f", process_name],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
 
             # Also kill if we have it tracked
             if process_name in self.running_processes:
@@ -321,7 +333,9 @@ ros2 launch turtlebot3_gazebo turtlebot3_empty_world.launch.py
             await asyncio.sleep(1)  # Give time for processes to terminate
 
         except Exception as e:
-            logger.warning(f"Warning: Could not kill existing {process_name} processes: {e}")
+            logger.warning(
+                f"Warning: Could not kill existing {process_name} processes: {e}"
+            )
 
     async def handle_command(self, command: str, args: Dict[str, Any]) -> str:
         """Handle incoming commands."""
@@ -397,11 +411,7 @@ class GUIWebSocketServer:
         """Start the WebSocket server."""
         logger.info(f"Starting GUI WebSocket server on {self.host}:{self.port}")
 
-        server = await websockets.serve(
-            self.handle_client,
-            self.host,
-            self.port
-        )
+        server = await websockets.serve(self.handle_client, self.host, self.port)
 
         logger.info(f"GUI WebSocket server started on ws://{self.host}:{self.port}")
         return server
