@@ -12,7 +12,7 @@ It receives instructions from the MCP server to launch tools such as `Gazebo` or
 It processes natural language input, maps it to ROS commands, and communicates with the socket server.
 To enable node communication between the MCP server and the local ROS environment, both must be configured with the same `ROS_DOMAIN_ID` on the same local network.
 
-## MCP tools
+## Overview of MCP Tools
 - `Topic Management`: List, monitor, and publish to ROS 2 topics
 - `Node Control`: List and inspect running ROS 2 nodes
 - `Service Interaction`: Call ROS 2 services with custom
