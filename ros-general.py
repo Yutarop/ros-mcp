@@ -23,11 +23,9 @@ def get_ros_env():
 
     # Ensure ROS_DOMAIN_ID is set
     if "ROS_DOMAIN_ID" not in env:
-        env["ROS_DOMAIN_ID"] = "37"  # Default value
+        env["ROS_DOMAIN_ID"] = "0"  # Default value
 
-    # Ensure other important ROS variables
-    if "ROS_DISTRO" not in env:
-        env["ROS_DISTRO"] = "humble"
+    return env
 
 
 def run_ros_command(command: list[str], timeout: Optional[float] = None) -> str:
@@ -76,10 +74,6 @@ def run_ros_command_with_bash(command: str, timeout: Optional[float] = None) -> 
 
         # Create a comprehensive bash command that sources ROS and sets environment
         full_command = f"""
-        source /opt/ros/humble/setup.bash
-        if [ -f ~/ros2_ws/install/setup.bash ]; then source ~/ros2_ws/install/setup.bash; fi
-        export ROS_DOMAIN_ID={env.get('ROS_DOMAIN_ID', '37')}
-        export ROS_DISTRO={env.get('ROS_DISTRO', 'humble')}
         {command}
         """.strip()
 
@@ -298,10 +292,6 @@ async def check_ros2_topic_hz(topic_name: str) -> str:
     try:
         env = get_ros_env()
         full_command = f"""
-        source /opt/ros/humble/setup.bash
-        if [ -f ~/ros2_ws/install/setup.bash ]; then source ~/ros2_ws/install/setup.bash; fi
-        export ROS_DOMAIN_ID={env.get('ROS_DOMAIN_ID', '37')}
-        export ROS_DISTRO={env.get('ROS_DISTRO', 'humble')}
         ros2 topic hz {topic_name}
         """.strip()
         process = subprocess.Popen(
@@ -477,16 +467,13 @@ async def get_topic_info(topic_name: str) -> str:
 
 @mcp.tool()
 async def debug_ros2_environment() -> str:
-    """Debug ROS 2 environment variables and setup.
-
-    Example: Check current ROS 2 environment configuration
-    """
+    """Debug ROS 2 environment variables and setup."""
     env = get_ros_env()
+
     debug_command = f"""
     echo "=== ROS 2 Environment Debug ==="
-    echo "ROS_DISTRO: {env.get('ROS_DISTRO', 'Not set')}"
-    echo "ROS_DOMAIN_ID: {env.get('ROS_DOMAIN_ID', 'Not set')}"
-    echo "DISPLAY: {env.get('DISPLAY', 'Not set')}"
+    echo "ROS_DOMAIN_ID: {env.get("ROS_DOMAIN_ID", "Not set")}"
+    echo "DISPLAY: {env.get("DISPLAY", "Not set")}"
     echo "=== Available topics ==="
     ros2 topic list
     echo "=== Available nodes ==="

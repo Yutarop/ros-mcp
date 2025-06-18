@@ -35,11 +35,8 @@ class GUILauncher:
         self.env = os.environ.copy()
 
         # Set default values if not already set
-        if "ROS_DISTRO" not in self.env:
-            self.env["ROS_DISTRO"] = "humble"
-
         if "ROS_DOMAIN_ID" not in self.env:
-            self.env["ROS_DOMAIN_ID"] = "37"
+            self.env["ROS_DOMAIN_ID"] = "0"
 
         if "DISPLAY" not in self.env:
             self.env["DISPLAY"] = ":0"
@@ -50,11 +47,7 @@ class GUILauncher:
 
         # Source ROS2 setup
         setup_command = f"""
-        source /opt/ros/humble/setup.bash
-        if [ -f ~/ros2_ws/install/setup.bash ]; then source ~/ros2_ws/install/setup.bash; fi
-        if [ -f ~/turtlebot3_ws/install/setup.bash ]; then source ~/turtlebot3_ws/install/setup.bash; fi
         export ROS_DOMAIN_ID={self.env['ROS_DOMAIN_ID']}
-        export ROS_DISTRO={self.env['ROS_DISTRO']}
         export DISPLAY={self.env['DISPLAY']}
         export TURTLEBOT3_MODEL={self.env['TURTLEBOT3_MODEL']}
         """
