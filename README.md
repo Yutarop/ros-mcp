@@ -19,8 +19,18 @@ To enable inter-node communication between the MCP server and the local ROS envi
 - uv package manager
 - Other dependencies as listed in `pyproject.toml`
 
-#### 1. Git clone
+#### Git clone
+```bash
+$ git clone git@github.com:Yutarop/ros-mcp.git
+$ cd ros-mcp
+```
 
+#### Activate .venv and install dependencies
+```bash
+$ uv venv
+$ source .venv/bin/activate
+$ uv pip install -e .
+```
 
 #### Claude Settings (`claude_desktop_config.json`)
 ```
@@ -45,7 +55,6 @@ To enable inter-node communication between the MCP server and the local ROS envi
 ## Run
 #### Start MCP server
 ```bash
-$ source .venv/bin/activate
 (ros-mcp) $ uv run ros-general.py
 ```
 #### Start socket server
