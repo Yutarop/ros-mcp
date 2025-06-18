@@ -3,8 +3,7 @@
 It supports communication via ROS topics, services, and actions, and works with any ROS message type.
 
 ## Demo
-## Componets
-(fig)
+## Components
 - **Socket Server** ([`socket_server.py`](https://github.com/Yutarop/ros-mcp/blob/main/src/socket_server.py)): A lightweight server that runs on the local machine to handle GUI-related operations. 
 It receives instructions from the MCP server to launch tools such as `Gazebo` or `rqt_graph` on the local display.
 
@@ -32,18 +31,19 @@ Please refer [here](https://github.com/Yutarop/ros-mcp/wiki/Available-Tools) for
 - uv package manager ([Installing uv](https://docs.astral.sh/uv/getting-started/installation/))
 - Other dependencies as listed in `pyproject.toml`
 
+### Installation
 #### Git clone and install websockets package
 ```bash
-$ git clone git@github.com:Yutarop/ros-mcp.git
-$ cd ros-mcp
-$ pip install "websockets>=15.0.1"
+git clone git@github.com:Yutarop/ros-mcp.git
+cd ros-mcp
+pip install "websockets>=15.0.1"
 ```
 
 #### Activate .venv and install dependencies
 ```bash
-$ uv venv
-$ source .venv/bin/activate
-$ uv pip install -e .
+uv venv
+source .venv/bin/activate
+uv pip install -e .
 ```
 
 #### Claude Settings (`claude_desktop_config.json`)
@@ -67,7 +67,7 @@ To use the MCP server correctly with Claude Desktop, you need to modify the clau
 ```
 ##### **💡 Replace the following placeholders:**
 - `/ABSOLUTE/PATH/TO/PARENT/FOLDER/ros-mcp`
-Replace with the absolute path to the directory ros-mcp. 
+Replace with the absolute path the ros-mcp directory. 
 For example: /home/ubuntu/ros-mcp
 
 - `YOUR_ROS_DOMAIN_ID`
@@ -75,7 +75,7 @@ For example: /home/ubuntu/ros-mcp
   ```bash
   echo $ROS_DOMAIN_ID
   ```
-  If nothing is printed, it means the domain ID is not explicitly set and the default value 0 will be used.
+  If nothing is printed, the domain ID is not set, and the default value 0 will be used.
   Alternatively, you can set it manually using the following command:
   ```bash
   export ROS_DOMAIN_ID=10  # Replace 10 with your desired domain ID
@@ -86,16 +86,18 @@ For example: /home/ubuntu/ros-mcp/ros-general.py
 
 ## Run
 #### Start MCP server
+Make sure your virtual environment is activated before running the MCP server:
 ```bash
 (ros-mcp) $ uv run ros-general.py
 ```
 #### Start socket server
 ```bash
-$ python3 socket_server.py
+python3 socket_server.py
 ```
  > 💡not in the virtual environment!
 
 ## Upcoming
 - [ ] Add tools for creating and controlling objects in Gazebo
 - [ ] Convert [TurtleBot3 agent](https://github.com/Yutarop/turtlebot3_agent) tools into MCP-compatible tools using LangChain MCP adapters
-- [ ] Let the MCP server detect whether a ROS package contains nodes that require a GUI, and launch the GUI if necessary. Currently, this detection is hard-coded for specific packages.
+- [ ] Let the MCP server detect whether a ROS package contains nodes that require a GUI, and launch the GUI if necessary.
+      Currently, this detection is hard-coded for specific packages.
