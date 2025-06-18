@@ -13,19 +13,19 @@ It processes natural language input, maps it to ROS commands, and communicates w
 To enable node communication between the MCP server and the local ROS environment, both must be configured with the same `ROS_DOMAIN_ID` on the same local network.
 
 ## Overview of MCP Tools
-- `Topic Management`: List, monitor, and publish to ROS 2 topics
-- `Node Control`: List and inspect running ROS 2 nodes
-- `Service Interaction`: Call ROS 2 services with custom
-- `Action Support`: Send goals to ROS 2 actions
-- `GUI Integration`: Launch ROS 2 GUI tools via WebSocket server
-- `Environment Debugging`: Check ROS 2 setup and configuration
-- `Process Management`: Clean up running ROS 2 processes
+- `Topic Management`: List, monitor, and publish to ROS2 topics
+- `Node Control`: List and inspect running ROS2 nodes
+- `Service Interaction`: Call ROS2 services with custom
+- `Action Support`: Send goals to ROS2 actions
+- `GUI Integration`: Launch ROS2 GUI tools via WebSocket server
+- `Environment Debugging`: Check ROS2 setup and configuration
+- `Process Management`: Clean up running ROS2 processes
 
 Please refer [here](https://github.com/Yutarop/ros-mcp/wiki/Available-Tools) for more details.
 
 ## Getting Started
 #### Requirements
-- ROS 2 Humble Hawksbill (This project has only been tested with ROS 2 Humble. Compatibility with other ROS 2 distributions is not guaranteed.)
+- ROS2 Humble Hawksbill (This project has only been tested with ROS2 Humble. Compatibility with other ROS2 distributions is not guaranteed.)
 - claude desktop ([Linux](https://github.com/aaddrick/claude-desktop-debian), [macOS](https://claude.ai/download) and [Windows](https://claude.ai/download))
 - Python 3.10+
 - websockets >= 15.0.1
@@ -95,7 +95,7 @@ $ python3 socket_server.py
 ```
  > 💡not in the virtual environment!
 
-## Upcomming
+## Upcoming
 - [ ] Add tools for creating and controlling objects in Gazebo
 - [ ] Convert [TurtleBot3 agent](https://github.com/Yutarop/turtlebot3_agent) tools into MCP-compatible tools using LangChain MCP adapters
 - [ ] Let the MCP server detect whether a ROS package contains nodes that require a GUI, and launch the GUI if necessary. Currently, this detection is hard-coded for specific packages.
