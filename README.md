@@ -12,17 +12,30 @@ It receives instructions from the MCP server to launch tools such as `Gazebo` or
 It processes natural language input, maps it to ROS commands, and communicates with the socket server.
 To enable node communication between the MCP server and the local ROS environment, both must be configured with the same `ROS_DOMAIN_ID` on the same local network.
 
+## Features
+- `Topic Management`: List, monitor, and publish to ROS 2 topics
+- `Node Control`: List and inspect running ROS 2 nodes
+- `Service Interaction`: Call ROS 2 services with custom
+- `Action Support`: Send goals to ROS 2 actions
+- `GUI Integration`: Launch ROS 2 GUI tools via WebSocket server
+- `Environment Debugging`: Check ROS 2 setup and configuration
+- `Process Management`: Clean up running ROS 2 processes
+Please refer to the GitWiki for more details.
+
 ## Getting Started
 #### Requirements
 - ROS 2 Humble Hawksbill (This project has only been tested with ROS 2 Humble. Compatibility with other ROS 2 distributions is not guaranteed.)
+- claude desktop ([Linux](https://github.com/aaddrick/claude-desktop-debian), [macOS](https://claude.ai/download) and [Windows](https://claude.ai/download))
 - Python 3.10+
+- websockets >= 15.0.1
 - uv package manager
 - Other dependencies as listed in `pyproject.toml`
 
-#### Git clone
+#### Git clone and install websockets package
 ```bash
 $ git clone git@github.com:Yutarop/ros-mcp.git
 $ cd ros-mcp
+$ pip install "websockets>=15.0.1"
 ```
 
 #### Activate .venv and install dependencies
