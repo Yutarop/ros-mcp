@@ -502,6 +502,23 @@ async def echo_ros2_topic(topic_name: str, count: int = 1) -> str:
             ["ros2", "topic", "echo", topic_name, f"--times", str(count)], timeout=10
         )
 
+@mcp.tool()
+async def clean_all_ros2_nodes() -> str:
+    """Kills all currently running ROS 2 and Gazebo related processes to clean the environment."""
+    bash_command = """
+    echo "Killing all ROS 2 and Gazebo related processes..."
+    PIDS=$(ps aux | grep -E "ros2|gazebo|gzserver|gzclient" | grep -v grep | awk '{print $2}')
+    if [ -z "$PIDS" ]; then
+        echo "No ROS 2 nodes or Gazebo processes running."
+    else
+        echo "Killing the following PIDs:"
+        echo "$PIDS"
+        kill -9 $PIDS
+        echo "All ROS 2 related processes killed."
+    fi
+    """
+    return run_ros_command_with_bash(bash_command)
+
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")

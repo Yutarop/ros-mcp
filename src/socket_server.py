@@ -41,7 +41,6 @@ class GUILauncher:
         if "DISPLAY" not in self.env:
             self.env["DISPLAY"] = ":0"
 
-        # Set TurtleBot3 model if not set
         if "TURTLEBOT3_MODEL" not in self.env:
             self.env["TURTLEBOT3_MODEL"] = "burger"
 
