@@ -19,6 +19,9 @@ To enable inter-node communication between the MCP server and the local ROS envi
 - uv package manager
 - Other dependencies as listed in `pyproject.toml`
 
+#### 1. Git clone
+
+
 #### Claude Settings (`claude_desktop_config.json`)
 ```
 {
@@ -52,3 +55,5 @@ $ python3 socket_server.py
 
 ## Provided Tools
 ## Upcomming
+- [ ] Add tools for creating and controlling objects in Gazebo
+- [ ] Convert [TurtleBot3 agent](https://github.com/Yutarop/turtlebot3_agent) tools into MCP-compatible tools using LangChain MCP adapters
