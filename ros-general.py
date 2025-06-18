@@ -334,20 +334,34 @@ async def list_ros2_services() -> str:
 
 
 @mcp.tool()
-async def call_ros2_service(service_name: str, srv_type: str, request: str) -> str:
-    """Calls a ROS 2 service with the specified name, type, and request.
+async def call_ros2_service(service_name: str, srv_type: str, request: Optional[str] = None) -> str:
+    """
+    Calls a ROS 2 service with the specified name, type, and optional request.
 
     Args:
-        service_name: Name of the service to call
-        srv_type: Type of the service (e.g., std_srvs/srv/Empty)
-        request: Request payload in string format (e.g., "{}")
+        service_name: Name of the service to call.
+        srv_type: Type of the service (e.g., "std_srvs/srv/Empty").
+        request: Request payload in string format (e.g., "{r: 255, g: 0, b: 0, width: 2, off: 0}").
+                 If the service type does not require a request (e.g., std_srvs/srv/Empty),
+                 this can be omitted or set to None.
 
     Example:
-        service_name: "/clear_costmap"
-        srv_type: "std_srvs/srv/Empty"
-        request: "{}"
+        Call a service without a request:
+            service_name = "/clear"
+            srv_type = "std_srvs/srv/Empty"
+
+        Call a service with a request:
+            service_name = "/turtle1/set_pen"
+            srv_type = "turtlesim/srv/SetPen"
+            request = "{r: 255, g: 0, b: 0, width: 2, off: 0}"
     """
-    return run_ros_command(["ros2", "service", "call", service_name, srv_type, request])
+    command = ["ros2", "service", "call", service_name, srv_type]
+
+    # Append request only if it's meaningful
+    if request and request.strip() not in ["", "{}", "None"]:
+        command.append(request)
+
+    return run_ros_command(command)
 
 
 @mcp.tool()
