@@ -50,7 +50,6 @@ $ uv pip install -e .
   }
 }
 ```
-#### Cursor Settings 
 
 ## Run
 #### Start MCP server
@@ -67,4 +66,4 @@ $ python3 socket_server.py
 ## Upcomming
 - [ ] Add tools for creating and controlling objects in Gazebo
 - [ ] Convert [TurtleBot3 agent](https://github.com/Yutarop/turtlebot3_agent) tools into MCP-compatible tools using LangChain MCP adapters
-- [ ] Let the MCP server detect whether a ROS package contains nodes that require a GUI, and launch the GUI if necessary.
+- [ ] Let the MCP server detect whether a ROS package contains nodes that require a GUI, and launch the GUI if necessary. Currently, this detection is hard-coded for specific packages.
