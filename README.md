@@ -61,6 +61,7 @@ $ uv pip install -e .
 ```bash
 $ python3 socket_server.py
 ```
+ > 💡not in the virtual environment!
 
 ## Provided Tools
 ## Upcomming
