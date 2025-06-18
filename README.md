@@ -10,7 +10,7 @@ It receives instructions from the MCP server to launch tools such as `Gazebo` or
 
 - **MCP Server** ([`ros-general.py`](https://github.com/Yutarop/ros-mcp/blob/main/ros-general.py)): A Python-based server that implements the MCP.
 It processes natural language input, maps it to ROS commands, and communicates with the socket server.
-To enable inter-node communication between the MCP server and the local ROS environment, both must be configured with the same `ROS_DOMAIN_ID` on the same local network.
+To enable node communication between the MCP server and the local ROS environment, both must be configured with the same `ROS_DOMAIN_ID` on the same local network.
 
 ## Getting Started
 #### Requirements
@@ -33,6 +33,7 @@ $ uv pip install -e .
 ```
 
 #### Claude Settings (`claude_desktop_config.json`)
+To use the MCP server correctly with Claude Desktop, you need to modify the claude_desktop_config.json file with appropriate values.
 ```
 {
   "mcpServers": {
@@ -50,6 +51,24 @@ $ uv pip install -e .
   }
 }
 ```
+##### **💡 Replace the following placeholders:**
+- `/ABSOLUTE/PATH/TO/PARENT/FOLDER/ros-mcp`
+Replace with the absolute path to the directory ros-mcp. 
+For example: /home/ubuntu/ros-mcp
+
+- `YOUR_ROS_DOMAIN_ID`
+  Replace with the ROS domain ID used in your environment to enable ROS communication between the MCP server and your local machine. If you're not sure what your current domain ID is, you can check it by running the following command in your terminal:
+  ```bash
+  echo $ROS_DOMAIN_ID
+  ```
+  If nothing is printed, it means the domain ID is not explicitly set and the default value 0 will be used.
+  Alternatively, you can set it manually using the following command:
+  ```bash
+  export ROS_DOMAIN_ID=10  # Replace 10 with your desired domain ID
+  ```
+- `/ABSOLUTE/PATH/TO/PARENT/FOLDER/ros-general.py`
+Replace with the absolute path to your ros-general.py script.
+For example: /home/ubuntu/ros-mcp/ros-general.py
 
 ## Run
 #### Start MCP server
