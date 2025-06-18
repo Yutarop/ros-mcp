@@ -20,10 +20,27 @@ To enable inter-node communication between the MCP server and the local ROS envi
 - Other dependencies as listed in `pyproject.toml`
 
 #### Claude Settings (`claude_desktop_config.json`)
+```
+{
+  "mcpServers": {
+    "ros-general": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/ABSOLUTE/PATH/TO/PARENT/FOLDER/ros-mcp",
+        "run",
+        "bash",
+        "-c",
+        "export ROS_LOG_DIR=/tmp && export ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-YOUR_ROS_DOMAIN_ID} && source /opt/ros/humble/setup.bash && python3 /ABSOLUTE/PATH/TO/PARENT/FOLDER/ros-general.py"
+      ]
+    }
+  }
+}
+```
 #### Cursor Settings 
 
 ## Run
-#### Start the MCP server
+#### Start MCP server
 ```bash
 $ source .venv/bin/activate
 (ros-mcp) $ uv run ros-general.py
