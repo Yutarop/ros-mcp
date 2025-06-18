@@ -16,10 +16,11 @@ To enable inter-node communication between the MCP server and the local ROS envi
 #### Requirements
 - ROS 2 Humble Hawksbill (This project has only been tested with ROS 2 Humble. Compatibility with other ROS 2 distributions is not guaranteed.)
 - Python 3.10+
-- uv (Python package manager)
+- uv package manager
 - Other dependencies as listed in `pyproject.toml`
-#### Claude Settings
-#### Cursor Settings
+
+#### Claude Settings (`claude_desktop_config.json`)
+#### Cursor Settings 
 
 ## Run
 #### Start the MCP server
@@ -27,7 +28,7 @@ To enable inter-node communication between the MCP server and the local ROS envi
 $ source .venv/bin/activate
 (ros-mcp) $ uv run ros-general.py
 ```
-#### start socket server
+#### Start socket server
 ```bash
 $ python3 socket_server.py
 ```
