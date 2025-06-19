@@ -3,6 +3,7 @@
 It supports communication via ROS topics, services, and actions, and works with any ROS message type.
 
 ## Demo
+#### Test to see if ros topics, services, and actions can be used.
 https://github.com/user-attachments/assets/61143c37-fb73-4998-9cbc-844d92ae61d9
 
 ## Components
