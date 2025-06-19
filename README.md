@@ -84,7 +84,7 @@ For example: /home/ubuntu/ros-mcp
 Replace with the absolute path to your ros-general.py script.
 For example: /home/ubuntu/ros-mcp/ros-general.py
 
-## Run
+## Running the Servers
 #### Start MCP server
 Make sure your virtual environment is activated before running the MCP server:
 ```bash
@@ -96,8 +96,11 @@ python3 socket_server.py
 ```
  > 💡not in the virtual environment!
 
-## Upcoming
+## To Do
 - [ ] Add tools for creating and controlling objects in Gazebo
-- [ ] Convert [TurtleBot3 agent](https://github.com/Yutarop/turtlebot3_agent) tools into MCP-compatible tools using LangChain MCP adapters
+- [ ] Integrate with the [Filesystem MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) to enable commands for creating new ROS 2 packages (Python or C++) and performing file operations as requested.  
+      This includes support for:  
+      - `ros2 pkg create <package_name> --build-type ament_python`   
+      - `ros2 pkg create <package_name> --build-type ament_cmake` 
 - [ ] Let the MCP server detect whether a ROS package contains nodes that require a GUI, and launch the GUI if necessary.
       Currently, this detection is hard-coded for specific packages.
