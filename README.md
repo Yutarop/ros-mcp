@@ -3,6 +3,8 @@
 It supports communication via ROS topics, services, and actions, and works with any ROS message type.
 
 ## Demo
+https://github.com/user-attachments/assets/61143c37-fb73-4998-9cbc-844d92ae61d9
+
 ## Components
 - **Socket Server** ([`socket_server.py`](https://github.com/Yutarop/ros-mcp/blob/main/src/socket_server.py)): A lightweight server that runs on the local machine to handle GUI-related operations. 
 It receives instructions from the MCP server to launch tools such as `Gazebo` or `rqt_graph` on the local display.
