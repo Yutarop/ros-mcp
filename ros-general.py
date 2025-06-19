@@ -253,16 +253,16 @@ async def publish_ros2_topic(
     """Publishes a message to a specific ROS 2 topic for a given duration (in seconds).
 
     Args:
-        topic: Topic name to publish to (e.g., "/chatter")
-        msg_type: ROS 2 message type (e.g., "std_msgs/msg/String")
-        msg_content: Message to send (e.g., "data: Hello")
+        topic: Topic name to publish to (e.g., "/cmd_vel")
+        msg_type: ROS 2 message type (e.g., "geometry_msgs/msg/Twist")
+        msg_content: Message to send (e.g., '{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.5}}')
         duration: Duration in seconds to continue publishing
 
     Example:
-        topic: "/chatter"
-        msg_type: "std_msgs/msg/String"
-        msg_content: "data: Hello"
-        duration: 3
+        topic: "/cmd_vel"
+        msg_type: "geometry_msgs/msg/Twist"
+        msg_content: '{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.5}}'
+        duration: 5
     """
     try:
         env = get_ros_env()
