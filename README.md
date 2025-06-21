@@ -7,12 +7,16 @@ It supports communication via ROS topics, services, and actions, and works with 
 https://github.com/user-attachments/assets/61143c37-fb73-4998-9cbc-844d92ae61d9
 
 ## Components
-- **Socket Server** ([`socket_server.py`](https://github.com/Yutarop/ros-mcp/blob/main/src/socket_server.py)): A lightweight server that runs on the local machine to handle GUI-related operations. 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f28dd8ae-8a05-4b68-902d-cabfe6d16f6e" />
+</p>
+
+- **Socket Server** ([`socket_server.py`](https://github.com/Yutarop/ros-mcp/blob/main/src/socket_server.py)): A lightweight server that runs on localhost:8765 to handle GUI-related operations. 
 It receives instructions from the MCP server to launch tools such as `Gazebo` or `rqt_graph` on the local display.
 
 - **MCP Server** ([`ros-general.py`](https://github.com/Yutarop/ros-mcp/blob/main/ros-general.py)): A Python-based server that implements the MCP.
 It processes natural language input, maps it to ROS commands, and communicates with the socket server.
-To enable node communication between the MCP server and the local ROS environment, both must be configured with the same `ROS_DOMAIN_ID` on the same local network.
+To enable node communication between the MCP server and the local machine, both must be configured with the same `ROS_DOMAIN_ID` on the same local network.
 
 ## Overview of MCP Tools
 - `Topic Management`: List, monitor, and publish to ROS2 topics
