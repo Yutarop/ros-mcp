@@ -7,10 +7,6 @@ It supports communication via ROS topics, services, and actions, and works with 
 https://github.com/user-attachments/assets/61143c37-fb73-4998-9cbc-844d92ae61d9
 
 ## Components
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/f28dd8ae-8a05-4b68-902d-cabfe6d16f6e" />
-</p>
-
 - **Socket Server** ([`socket_server.py`](https://github.com/Yutarop/ros-mcp/blob/main/src/socket_server.py)): A lightweight server that runs on localhost:8765 to handle GUI-related operations. 
 It receives instructions from the MCP server to launch tools such as `Gazebo` or `rqt_graph` on the local display.
 
