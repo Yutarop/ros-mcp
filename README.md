@@ -1,5 +1,6 @@
 ## ROS MCP
 [![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/Yutarop/ros-mcp)](https://archestra.ai/mcp-catalog/yutarop__ros-mcp)
+
 **ROS MCP** is a MCP server designed for controlling robots in ROS environments using natural language. 
 It supports communication via ROS topics, services, and actions, and works with any ROS message type.
 
