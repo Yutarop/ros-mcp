@@ -9,6 +9,15 @@ It supports communication via ROS topics, services, and actions, and works with 
 #### Test to see if ros topics, services, and actions can be used.
 https://github.com/user-attachments/assets/61143c37-fb73-4998-9cbc-844d92ae61d9
 
+##### Prompt used (Topic)
+> Open gazebo with TurtleBot3 and publish topic to move it.
+
+##### Prompt used (Service)
+> Show me service list and call service to reset the world in Gazebo.
+
+##### Prompt used (Action)
+> Show me action list and call action to move the TurtleBot3 forward for 1m.
+
 ## Components
 - **Socket Server** ([`socket_server.py`](https://github.com/Yutarop/ros-mcp/blob/main/src/socket_server.py)): A lightweight server that runs on localhost:8765 to handle GUI-related operations. 
 It receives instructions from the MCP server to launch tools such as `Gazebo` or `rqt_graph` on the local display.
