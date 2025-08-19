@@ -1,0 +1,67 @@
+name: ROS2 humble CI
+on:
+  pull_request:
+jobs:
+  auto_format:
+    name: Auto-format Python & XML
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install format tools
+        run: |
+          sudo apt update
+          sudo apt install -y libxml2-utils
+          pip install black isort autoflake
+      - name: Run autoflake
+        run: |
+          find . -type f -name "*.py" -exec autoflake --in-place --remove-unused-variables --remove-all-unused-imports {} \;
+      - name: Run isort
+        run: |
+          find . -type f -name "*.py" -exec isort {} \;
+      - name: Run black
+        run: |
+          black .
+      - name: Format XML files
+        run: |
+          find . -type f \( -name "*.xml" -or -name "*.urdf" -or -name "*.xacro" -or -name "*.sdf" \) -exec xmllint --format -o {} {} \;
+      - name: Auto-commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Apply formatting to PR files"
+          commit_user_name: github-actions[bot]
+          commit_user_email: github-actions[bot]@users.noreply.github.com
+    
+  build_check:
+    name: ROS2 Build Check (colcon via industrial_ci)
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ros_distro: [humble]
+        ros_repo: [main, testing]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Run industrial_ci
+        uses: ros-industrial/industrial_ci@master
+        env:
+          ROS_DISTRO: ${{ matrix.ros_distro }}
+          ROS_REPO: ${{ matrix.ros_repo }}
+          BEFORE_BUILD_TARGET_WORKSPACE: 'apt update -q && python3 -m pip install -q -r requirements.txt'
+          IMMEDIATE_TEST_OUTPUT: true
+          CLANG_FORMAT_CHECK: none
+          CLANG_TIDY: none
+          PYLINT_CHECK: false
+          BLACK_CHECK: false
+          
