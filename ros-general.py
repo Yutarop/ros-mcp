@@ -3,9 +3,8 @@ import json
 import os
 import select
 import subprocess
-import sys
 import time
-from typing import Any, Optional
+from typing import Optional
 
 import websockets
 from mcp.server.fastmcp import FastMCP
@@ -334,7 +333,9 @@ async def list_ros2_services() -> str:
 
 
 @mcp.tool()
-async def call_ros2_service(service_name: str, srv_type: str, request: Optional[str] = None) -> str:
+async def call_ros2_service(
+    service_name: str, srv_type: str, request: Optional[str] = None
+) -> str:
     """
     Calls a ROS 2 service with the specified name, type, and optional request.
 
@@ -515,6 +516,7 @@ async def echo_ros2_topic(topic_name: str, count: int = 1) -> str:
         return run_ros_command(
             ["ros2", "topic", "echo", topic_name, f"--times", str(count)], timeout=10
         )
+
 
 @mcp.tool()
 async def clean_all_ros2_nodes() -> str:
